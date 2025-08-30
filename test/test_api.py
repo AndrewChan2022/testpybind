@@ -12,8 +12,13 @@ def test_array():
     b = np.array([4, 5, 6], dtype=np.float64)
     c = testpybind.add_arrays(a, b)
     np.testing.assert_array_equal(c, [5, 7, 9])
+    print(f"a {a} +  b {b} => c {c}")
 
     # test size mismatch
     a2 = np.array([1, 2], dtype=np.float64)
     with pytest.raises(RuntimeError):
         testpybind.add_arrays(a2, b)
+
+if __name__ == "__main__":
+    test_scalar()
+    test_array()

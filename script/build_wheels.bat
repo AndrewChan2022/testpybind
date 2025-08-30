@@ -2,7 +2,7 @@
 setlocal
 
 REM List of Python versions
-set PY_VERSIONS=3.9 3.10 3.11 3.12
+set PY_VERSIONS=39 310 311 312
 
 for %%V in (%PY_VERSIONS%) do (
     echo Building wheel for Python %%V

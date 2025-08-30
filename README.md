@@ -1,8 +1,13 @@
 # qick start
 
 ```bash
-pip install .
+git clone https://github.com/AndrewChan2022/testpybind
+cd testpybind
+
+pip install numpy pytest
+pip install -v .
 python test/test_api.py
+pytest -v test/test_api.py
 ```
 
 
@@ -11,23 +16,19 @@ python test/test_api.py
 
 ## overview
 
-1. build system with cmake
-2. pip install with pyproject.toml
-3. script to build wheels for conda py39~py312
-4. same libstdc++ with conda default
-5. bind python with pybind11
-6. interface support both numpy 1 and numpy 2
+1. pyproject.toml + cmake for build and install
+2. script to build wheels for conda py39~py312
+3. buid c++ with pybind11
+4. interface for both numpy 1 and numpy 2
+5. same libstdc++ with conda default
 
 ## build
 
-1. prerequesite: conda and pybind11 lib
+1. prerequesite: conda env
     ```bash
     conda create -n py310 python=3.10
     conda activate py310
-    # lib
-    conda install -c conda-forge pybind11 -y
-    # setup
-    python -m pip install --upgrade pip setuptools wheel scikit-build pybind11
+    pip install numpy pytest
     ```
 
 2. install and test
@@ -43,20 +44,17 @@ python test/test_api.py
     # windows
     script/build_wheels.bat
     ```
-4. c++ build
+4. c++ build only
    ```bash
+    conda install -c conda-forge pybind11 -y
     mkdir vsbuild
     cd vsbuild
     cmake ..
    ```
 
 
-
 # implement 
 
-Perfect! We can build a full **PyBind11 C++ project** with CMake, PyProject-based installation, multi-Python support (via Conda), and example APIs that handle both scalar addition and NumPy arrays. I’ll guide you step by step, including theory, reasoning, and practical implementation.
-
----
 
 ## **1. Project Structure**
 
@@ -91,30 +89,42 @@ TestPyBind/
 
 ### Root `CMakeLists.txt`
 
+document: https://pybind11.readthedocs.io/en/stable/compiling.html
+
+1. root cmake must have pybind11_add_module
+2. must install: install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(TestPyBind LANGUAGES CXX)
 
-# PyBind11
+# Find pybind11
 find_package(pybind11 REQUIRED)
 
 # C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+pybind11_add_module(testpybind)
+
 # Add src
 add_subdirectory(src)
+
+install(TARGETS testpybind
+        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
 ```
 
 ### `src/CMakeLists.txt`
 
 ```cmake
-pybind11_add_module(testpybind
-    main.cpp
-    array_ops.cpp
+set(SRC_FILES
+    testpybind/main.cpp
+    testpybind/array_ops.cpp
 )
 
+target_sources(testpybind PRIVATE ${SRC_FILES})
 target_include_directories(testpybind PRIVATE ${PYBIND11_INCLUDE_DIR})
+
 ```
 
 ---
@@ -199,8 +209,15 @@ void bind_array(py::module &m) {
 
 ```toml
 [build-system]
-requires = ["setuptools>=61", "wheel", "pybind11>=2.10", "cmake"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "testpybind"
+version = "0.1.0"
+description = "Test project using pybind11 + CMake"
+authors = [{name = "Bill", email = "you@example.com"}]
+requires-python = ">=3.9"
 ```
 
 ---
@@ -211,7 +228,7 @@ Create a shell script `scripts/build_wheels.sh`:
 
 ```bash
 #!/bin/bash
-PYTHON_VERSIONS=("3.9" "3.10" "3.11" "3.12")
+PYTHON_VERSIONS=("39" "310" "311" "312")
 
 for ver in "${PYTHON_VERSIONS[@]}"; do
     conda activate "py${ver}"
@@ -243,22 +260,36 @@ Python tests:
 
 ```python
 import numpy as np
+import pytest
 import testpybind
 
-# Scalar
-print(testpybind.add_scalar(1, 2))
-print(testpybind.add_scalar(1.5, 2.5))
+def test_scalar():
+    assert testpybind.add_scalar(1, 2) == 3
+    assert testpybind.add_scalar(1.5, 2.5) == 4.0
+    assert testpybind.add_scalar(1.2, 2.8) == pytest.approx(4.0)
 
-# Array
-a = np.array([1, 2, 3], dtype=np.float64)
-b = np.array([4, 5, 6], dtype=np.float64)
-print(testpybind.add_arrays(a, b))  # [5, 7, 9]
+def test_array():
+    a = np.array([1, 2, 3], dtype=np.float64)
+    b = np.array([4, 5, 6], dtype=np.float64)
+    c = testpybind.add_arrays(a, b)
+    np.testing.assert_array_equal(c, [5, 7, 9])
+    print(f"a {a} +  b {b} => c {c}")
+
+    # test size mismatch
+    a2 = np.array([1, 2], dtype=np.float64)
+    with pytest.raises(RuntimeError):
+        testpybind.add_arrays(a2, b)
+
+if __name__ == "__main__":
+    test_scalar()
+    test_array()
 ```
 
 run test
 ```bash
 pip install -v .
 python test/test_api.py
+pytest -v test/test_api.py
 ```
 
 
@@ -287,6 +318,13 @@ conda default libstdc++ is for gcc10
 3. **PEP 517 (`pyproject.toml`)**: standard Python build system.
 4. **NumPy arrays**: use `unchecked` for fast elementwise ops.
 5. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
+
+## **10. summary
+
+1. build system: docment: https://pybind11.readthedocs.io/en/stable/compiling.html
+   a. root cmake need pybind11_add_module
+   b. need install: install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+2. for best portable, need old linux with old gcc10
 
 ---
 

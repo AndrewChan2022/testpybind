@@ -1,4 +1,10 @@
 [build-system]
-requires = ["scikit-build", "setuptools>=61", "wheel", "pybind11>=2.10", "cmake"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
 
+[project]
+name = "testpybind"
+version = "0.1.0"
+description = "Test project using pybind11 + CMake"
+authors = [{name = "Bill", email = "you@example.com"}]
+requires-python = ">=3.9"
