@@ -8,7 +8,12 @@ cd testpybind
 pip install -v .
 pip install numpy pytest
 
-# test
+# test numpy 1.x
+pip install numpy==1.23.5
+python test/test_api.py
+
+# test numpy 2.x
+pip install --upgrade "numpy>=2.0.0"
 python test/test_api.py
 pytest -v test/test_api.py
 ```
@@ -41,7 +46,8 @@ table of content
         low os version
         low gcc version
     dependency lib
-        collect by script
+        pyproject.toml not collect binary and dependency
+        it is responsibility of cmake
         force gcc min version
 
 ## build
@@ -155,7 +161,73 @@ target_include_directories(testpybind PRIVATE ${PYBIND11_INCLUDE_DIR})
 
 ---
 
-## **3. Example C++ APIs**
+## **3. pyproject.toml for pip/PEP517**
+
+document: https://pybind11.readthedocs.io/en/stable/compiling.html
+
+```toml
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "testpybind"
+version = "0.1.0"
+description = "Test project using pybind11 + CMake"
+authors = [{name = "Bill", email = "you@example.com"}]
+requires-python = ">=3.9"
+```
+
+---
+
+
+
+## **4. Conda Multi-Python Build**
+
+Create a shell script `scripts/build_wheels.sh`:
+
+```bash
+#!/bin/bash
+PYTHON_VERSIONS=("39" "310" "311" "312")
+
+for ver in "${PYTHON_VERSIONS[@]}"; do
+    conda activate "py${ver}"
+    python -m pip install --upgrade pip setuptools wheel cmake pybind11
+
+    python -m build --wheel --outdir dist
+done
+```
+
+> **Theory**:
+>
+> * Using Conda Python ensures consistent `libstdc++`.
+> * Wheel is built per Python version.
+> * No need to upgrade system GCC/libstdc++ inside Conda.
+
+---
+
+## **5. dependency**
+
+this build system not collect the dependency.
+
+so we need 
+
+so you need write script to do it.
+
+some lib build on high version gcc version.
+
+so you need choose the minimum version that compatible with your 3rd party libs.
+
+
+for example:
+
+    1. binary lib without source build on c++ 20,  you have to upgrade your gcc version.
+    2. 3rd party source code with feature of c++ 20, you have to upgrade your gcc version.
+
+
+ ---
+
+## **6. Example C++ APIs**
 
 ### `main.cpp` – scalar addition
 
@@ -231,50 +303,7 @@ void bind_array(py::module &m) {
 
 ---
 
-## **4. pyproject.toml for pip/PEP517**
-
-document: https://pybind11.readthedocs.io/en/stable/compiling.html
-
-```toml
-[build-system]
-requires = ["scikit-build-core", "pybind11"]
-build-backend = "scikit_build_core.build"
-
-[project]
-name = "testpybind"
-version = "0.1.0"
-description = "Test project using pybind11 + CMake"
-authors = [{name = "Bill", email = "you@example.com"}]
-requires-python = ">=3.9"
-```
-
----
-
-## **5. Conda Multi-Python Build**
-
-Create a shell script `scripts/build_wheels.sh`:
-
-```bash
-#!/bin/bash
-PYTHON_VERSIONS=("39" "310" "311" "312")
-
-for ver in "${PYTHON_VERSIONS[@]}"; do
-    conda activate "py${ver}"
-    python -m pip install --upgrade pip setuptools wheel cmake pybind11
-
-    python -m build --wheel --outdir dist
-done
-```
-
-> **Theory**:
->
-> * Using Conda Python ensures consistent `libstdc++`.
-> * Wheel is built per Python version.
-> * No need to upgrade system GCC/libstdc++ inside Conda.
-
----
-
-## **6. Handling Exceptions and Safety**
+## **7. Handling Exceptions and Safety**
 
 * Scalars: straightforward
 * Arrays: raise `std::runtime_error` if shapes mismatch
@@ -282,7 +311,7 @@ done
 
 ---
 
-## **7. Testing**
+## **8. Testing**
 
 Python tests:
 
@@ -320,7 +349,7 @@ python test/test_api.py
 pytest -v test/test_api.py
 ```
 
-## **8. Distribution**
+## **9. Distribution**
 
 
 build
@@ -331,7 +360,7 @@ script/build_wheels.sh
 script/build_wheels.bat
 ```
 
-## **8. libstdc++**
+## **10. libstdc++**
 
 
 ### **Maximum Portable Binary**
@@ -390,35 +419,21 @@ script/build_wheels.bat
 * Building on old Linux with old GCC gives maximum portability because the resulting `libstdc++` and glibc dependencies are minimal.
 * Shipping your own `libstdc++` removes dependency on the system, at the cost of slightly larger binaries.
 
-
-## **9. Key Points / Documentation**
-
-this build system not collect the dependency.
-
-so you need write script to do it.
-
-some lib build on high version gcc version.
-
-so you need choose the minimum version that compatible with your 3rd party libs.
+---
 
 
-for example:
-
-    1. binary lib without source build on c++ 20,  you have to upgrade your gcc version.
-    2. 3rd party source code with feature of c++ 20, you have to upgrade your gcc version.
-
-
-## **10. Key Points / Documentation**
+## **11. Key Points / Documentation**
 
 1. **PyBind11**: binds C++ → Python, handles scalars and NumPy arrays.
 2. **CMake**: manages multi-platform C++ compilation
 3. **pybind11_add_module** must at root cmake
 4. **cmake install** is mandatory: install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
-5. **PEP 517 (`pyproject.toml`)**: standard Python build system.
-6. **NumPy arrays**: use `unchecked` for fast elementwise ops.
-7. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
+5. **dependency** need collect dependency in cmake install
+6. **PEP 517 (`pyproject.toml`)**: standard Python build system.
+7. **NumPy arrays**: use `unchecked` for fast elementwise ops.
+8. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
 
-## **11. reference**
+## **12. reference**
 
 1. build system: docment: https://pybind11.readthedocs.io/en/stable/compiling.html
 
