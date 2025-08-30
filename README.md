@@ -12,25 +12,25 @@
 
 ## build
 
-1. conda and pybind11 lib
-```bash
-conda create -n py310 python=3.10
-conda install -c conda-forge pybind11 -y
-```
+1. prerequesite: conda and pybind11 lib
+    ```bash
+    conda create -n py310 python=3.10
+    conda install -c conda-forge pybind11 -y
+    ```
 
 2. install and test
-```bash
-pip install -v .
-python test/test_api.py
-```
+    ```bash
+    pip install -v .
+    python test/test_api.py
+    ```
 
 4. c++ build
-```bash 
-# unix
-script/build_wheels.sh
-# windows
-script/build_wheels.bat
-```
+    ```bash 
+    # unix
+    script/build_wheels.sh
+    # windows
+    script/build_wheels.bat
+    ```
 
 
 
@@ -255,7 +255,15 @@ script/build_wheels.bat
 
 ---
 
-## **8. Key Points / Documentation**
+## **8. Build portable binary**
+
+1. build by gcc 10
+2. at any linux version, but better old linux versoin.
+3. for each python version by conda activate special version env
+
+conda default libstdc++ is for gcc10
+
+## **9. Key Points / Documentation**
 
 1. **PyBind11**: binds C++ → Python, handles scalars and NumPy arrays.
 2. **CMake**: manages multi-platform C++ compilation.
