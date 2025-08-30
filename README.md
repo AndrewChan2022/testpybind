@@ -4,8 +4,11 @@
 git clone https://github.com/AndrewChan2022/testpybind
 cd testpybind
 
-pip install numpy pytest
+# install
 pip install -v .
+pip install numpy pytest
+
+# test
 python test/test_api.py
 pytest -v test/test_api.py
 ```
