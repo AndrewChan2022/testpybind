@@ -312,32 +312,65 @@ script/build_wheels.sh
 script/build_wheels.bat
 ```
 
-## **8. libstdc++ **
-
-Maximum portable binary**
-
-    1. build by gcc 10, conda default libstdc++ is for gcc10
-    2. build at any linux version, but better old linux versoin
-    3. for each python version by conda activate special version env
+## **8. libstdc++**
 
 
-why old linux old gcc:
+### **Maximum Portable Binary**
 
-    1. libstdc++ version decided by gcc version
-    2. glibc version decided by os
-    3. each libstdc++ have many binary for each glibc version
-    4. os usually ship one libstdc++ version
-    5. app can also ship one libstdc++ version
-    6. bin depend on low libstdc++ version can run on high libstdc++ version
-    7. libstdc++ version depend on low glibc version can run on high glibc version
-    8. summary:  glibc version <--> libstdc++ version <--> app version
+1. Build with **GCC 10**, because conda’s default `libstdc++` is for GCC 10.
+2. Can be built on any Linux version, but **older Linux versions are preferable** (for wider compatibility).
+3. Must be built for each Python version separately (use `conda activate` with the desired Python version).
 
-distribution strategy:
+### **Why old Linux / old GCC is recommended**
 
-    1. strategy 1: app ship libstdc++:   most app use this stragegy
-       build with any gcc version on low linux version
-    2. strategy 2: app depend on system libstdc++:  python lib use this strategy
-       build with low gcc version on any linux version
+1. `libstdc++` version is determined by the GCC version used to build your code.
+2. `glibc` version is determined by the OS.
+3. Each `libstdc++` binary is linked against a specific glibc version. i.e. You have many libstdc++ binary for one gcc version against each glibc version.
+4. Most Linux distributions ship **only one glibc** and one `libstdc++` version.
+5. Applications can ship their own `libstdc++` if needed.
+6. Binaries built against a **lower `libstdc++` version** will generally run on systems with a **higher `libstdc++` version**.
+7. Binaries built against a **lower glibc version** will generally run on systems with a **higher glibc version**.
+8. **Summary:** `glibc version ↔ libstdc++ version ↔ application binary compatibility`.
+
+```txt
+           +--------------------+
+           |     Application    |
+           |   (built binary)   |
+           +--------------------+
+                     |
+        Depends on linked libstdc++ version
+                     |
+           +--------------------+
+           |     libstdc++      |
+           | (from GCC used to  |
+           |   build app)       |
+           +--------------------+
+                     |
+   Requires minimum glibc version on target OS
+                     |
+           +--------------------+
+           |       glibc        |
+           |   (from Linux OS)  |
+           +--------------------+
+```
+
+### **Distribution strategy**
+
+1. **Ship your own `libstdc++` (most apps do this)**
+
+   * Build with **any GCC version** on a **low Linux version**.
+   * Ensures your app runs anywhere, independent of system libraries.
+2. **Depend on system `libstdc++` (used by most Python packages)**
+
+   * Build with **low GCC version** on **any Linux version**.
+   * Guarantees compatibility with system libraries.
+
+
+✅ **Key takeaway:**
+
+* Building on old Linux with old GCC gives maximum portability because the resulting `libstdc++` and glibc dependencies are minimal.
+* Shipping your own `libstdc++` removes dependency on the system, at the cost of slightly larger binaries.
+
 
 
 ## **9. Key Points / Documentation**
