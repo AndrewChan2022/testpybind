@@ -28,9 +28,10 @@ features
 
     1. pyproject.toml + cmake for build and install
     2. script to build wheels for conda py39~py312
-    3. bind c++ with pybind11
-    4. interface for both numpy 1 and numpy 2
-    5. same libstdc++ with conda default
+    3. auto install lib and dependency to wheel root
+    4. bind c++ with pybind11
+    5. interface for both numpy 1 and numpy 2
+    6. same libstdc++ with conda default
 
 table of content
 
@@ -46,9 +47,7 @@ table of content
         low os version
         low gcc version
     dependency lib
-        pyproject.toml not collect binary and dependency
-        it is responsibility of cmake
-        force gcc min version
+        cmake install collect lib and dependency
 
 ## build
 
