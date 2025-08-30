@@ -36,14 +36,19 @@ python test/test_api.py
     python test/test_api.py
     ```
 
-4. c++ build
+3. wheel build
     ```bash 
     # unix
     script/build_wheels.sh
     # windows
     script/build_wheels.bat
     ```
-
+4. c++ build
+   ```bash
+    mkdir vsbuild
+    cd vsbuild
+    cmake ..
+   ```
 
 
 
