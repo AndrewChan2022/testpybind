@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <myadd/fadd.h>
 
 namespace py = pybind11;
 
@@ -11,6 +12,7 @@ void bind_scalar(py::module &m) {
     m.def("add_scalar", &add_scalar<int>, "Add two ints");
     m.def("add_scalar", &add_scalar<float>, "Add two floats");
     m.def("add_scalar", &add_scalar<double>, "Add two doubles");
+    m.def("fadd", &myadd::fadd, "Add two floats");
 }
 
 // declare

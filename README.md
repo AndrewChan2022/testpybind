@@ -142,8 +142,14 @@ pybind11_add_module(testpybind)
 # Add src
 add_subdirectory(src)
 
+# this munally install will not be removed by pip uninstall
+# install(TARGETS testpybind
+#         LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+
 install(TARGETS testpybind
-        LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+        LIBRARY DESTINATION .   # <- means "install into the wheel root"
+        RUNTIME DESTINATION .   # <- for Windows .pyd
+        ARCHIVE DESTINATION .)  # <- in case MSVC produces .lib
 ```
 
 ### `src/CMakeLists.txt`
@@ -181,8 +187,65 @@ requires-python = ">=3.9"
 ---
 
 
+## **4. auto binary and dependency into wheel**
 
-## **4. Conda Multi-Python Build**
+Python build system not collect libs and its dependency, This is done by cmake install.
+
+### Install lib to wheel 
+
+Install lib to wheel directory instead of site-pakcage directory.
+
+```bash
+# this munally install will not be removed by pip uninstall
+# install(TARGETS testpybind
+#         LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+# )
+
+install(TARGETS testpybind
+    LIBRARY DESTINATION .  # <- means "install into the wheel root"
+    RUNTIME DESTINATION .  # <- for Windows .pyd
+    ARCHIVE DESTINATION .  # <- in case MSVC produces .lib
+)
+```
+
+
+### Install dependency lib to wheel
+
+add dependency targets to install list
+
+```bash
+install(TARGETS testpybind myadd
+    ...
+)
+```
+
+### judge wheel build and normal c++ build
+
+```bash
+if(SKBUILD)
+    # Python wheel build, CMAKE_INSTALL_PREFIX to wheel directory
+    set(INSTALL_BIN_DIR .)
+    set(INSTALL_LIB_DIR .)
+else()
+    # Normal CMake build, to default CMAKE_INSTALL_PREFIX or fix place
+    set(INSTALL_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/bin)
+    set(INSTALL_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/lib)
+endif()
+```
+
+### gcc choose
+
+Some lib build on high version gcc version, so you need choose the minimum version that compatible with your 3rd party libs.
+
+
+For example:
+
+    1. binary lib without source build on c++ 20,  you have to upgrade your gcc version.
+    2. 3rd party source code with feature of c++ 20, you have to upgrade your gcc version.
+
+
+
+## **5. Conda Multi-Python Build**
 
 Create a shell script `scripts/build_wheels.sh`:
 
@@ -206,26 +269,6 @@ done
 
 ---
 
-## **5. dependency**
-
-this build system not collect the dependency.
-
-so we need 
-
-so you need write script to do it.
-
-some lib build on high version gcc version.
-
-so you need choose the minimum version that compatible with your 3rd party libs.
-
-
-for example:
-
-    1. binary lib without source build on c++ 20,  you have to upgrade your gcc version.
-    2. 3rd party source code with feature of c++ 20, you have to upgrade your gcc version.
-
-
- ---
 
 ## **6. Example C++ APIs**
 

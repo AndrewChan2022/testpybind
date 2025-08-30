@@ -8,3 +8,7 @@ version = "0.1.0"
 description = "Test project using pybind11 + CMake"
 authors = [{name = "Bill", email = "you@example.com"}]
 requires-python = ">=3.9"
+
+[tool.scikit-build]
+wheel.packages = ["testpybind"]   # ensures module is packaged
+
