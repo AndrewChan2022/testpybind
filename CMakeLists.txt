@@ -29,7 +29,7 @@ else()
     set(INSTALL_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/lib)
 endif()
 
-# install dir
+# output dir
 if(MSVC)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # .lib (static library)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # 
@@ -40,6 +40,7 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${INSTALL_BIN_DIR}")     # .exe, runtime
 endif()
 
+# install dir
 if(MSVC)
     install(TARGETS testpybind myadd
         LIBRARY DESTINATION ${INSTALL_BIN_DIR}   # <- means "install into the wheel root"

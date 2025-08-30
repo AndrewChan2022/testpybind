@@ -48,6 +48,7 @@ table of content
         low gcc version
     dependency lib
         cmake install collect lib and dependency
+        rpath: todo
 
 ## build
 
@@ -193,6 +194,8 @@ Python build system not collect libs and its dependency, This is done by cmake i
 ### Install lib to wheel 
 
 Install lib to wheel directory instead of site-pakcage directory.
+
+**Insall dir != output dir**
 
 ```bash
 # this munally install will not be removed by pip uninstall
@@ -463,6 +466,26 @@ script/build_wheels.bat
 
 ---
 
+## **12. rpath**
+
+todo:
+
+```bash
+# Make installed executables look in ../lib
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+
+# Also keep RPATH when running from build tree
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+```
+
+or set per target
+```bash
+set_target_properties(myexe PROPERTIES
+    INSTALL_RPATH "$ORIGIN/../lib"
+)
+```
+
 
 ## **11. Key Points / Documentation**
 
@@ -474,6 +497,7 @@ script/build_wheels.bat
 6. **PEP 517 (`pyproject.toml`)**: standard Python build system.
 7. **NumPy arrays**: use `unchecked` for fast elementwise ops.
 8. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
+9. **rpath**: todo
 
 ## **12. reference**
 
