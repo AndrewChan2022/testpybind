@@ -19,11 +19,27 @@ pytest -v test/test_api.py
 
 ## overview
 
-1. pyproject.toml + cmake for build and install
-2. script to build wheels for conda py39~py312
-3. bind c++ with pybind11
-4. interface for both numpy 1 and numpy 2
-5. same libstdc++ with conda default
+features
+
+    1. pyproject.toml + cmake for build and install
+    2. script to build wheels for conda py39~py312
+    3. bind c++ with pybind11
+    4. interface for both numpy 1 and numpy 2
+    5. same libstdc++ with conda default
+
+table of content
+
+    pyproject.toml + cmake to build wheel
+        pybind11_add_module at root
+        install to add binary to wheel:  install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+    multiple python version build
+        conda env
+    pybind11
+        bind c++
+        numpy 1 and numpy 2 parameter
+    max portable
+        low os version
+        low gcc version
 
 ## build
 
