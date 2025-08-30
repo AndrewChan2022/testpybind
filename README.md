@@ -1,12 +1,8 @@
 # qick start
 
 ```bash
-conda create -n py310 python=3.10
-conda activate py310
-
 pip install .
 python test/test_api.py
-
 ```
 
 
