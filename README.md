@@ -21,7 +21,7 @@ pytest -v test/test_api.py
 
 1. pyproject.toml + cmake for build and install
 2. script to build wheels for conda py39~py312
-3. buid c++ with pybind11
+3. bind c++ with pybind11
 4. interface for both numpy 1 and numpy 2
 5. same libstdc++ with conda default
 
@@ -47,9 +47,12 @@ pytest -v test/test_api.py
     # windows
     script/build_wheels.bat
     ```
-4. c++ build only
+4. build c++ only, not necessary
    ```bash
+    # manually install pybind11, pip install will auto install it
     conda install -c conda-forge pybind11 -y
+
+    # build with msvc
     mkdir vsbuild
     cd vsbuild
     cmake ..
@@ -81,6 +84,7 @@ TestPyBind/
 ```
 
 * `src/testpybind` → C++ source code
+* `test` → python test code
 * `pyproject.toml` → PEP 517 build system
 * `scripts/build_wheels.sh` → build for multiple Python versions
 * `scripts/build_wheels.bat` → build for multiple Python versions
@@ -210,6 +214,8 @@ void bind_array(py::module &m) {
 
 ## **4. pyproject.toml for pip/PEP517**
 
+document: https://pybind11.readthedocs.io/en/stable/compiling.html
+
 ```toml
 [build-system]
 requires = ["scikit-build-core", "pybind11"]
@@ -295,6 +301,8 @@ python test/test_api.py
 pytest -v test/test_api.py
 ```
 
+## **8. Distribution**
+
 
 build
 ```bash
@@ -304,30 +312,47 @@ script/build_wheels.sh
 script/build_wheels.bat
 ```
 
----
+## **8. libstdc++ **
 
-## **8. Build portable binary**
+Maximum portable binary**
 
-1. build by gcc 10
-2. at any linux version, but better old linux versoin.
-3. for each python version by conda activate special version env
+    1. build by gcc 10, conda default libstdc++ is for gcc10
+    2. build at any linux version, but better old linux versoin
+    3. for each python version by conda activate special version env
 
-conda default libstdc++ is for gcc10
+
+why old linux old gcc:
+
+    1. libstdc++ version decided by gcc version
+    2. glibc version decided by os
+    3. each libstdc++ have many binary for each glibc version
+    4. os usually ship one libstdc++ version
+    5. app can also ship one libstdc++ version
+    6. bin depend on low libstdc++ version can run on high libstdc++ version
+    7. libstdc++ version depend on low glibc version can run on high glibc version
+    8. summary:  glibc version <--> libstdc++ version <--> app version
+
+distribution strategy:
+
+    1. strategy 1: app ship libstdc++:   most app use this stragegy
+       build with any gcc version on low linux version
+    2. strategy 2: app depend on system libstdc++:  python lib use this strategy
+       build with low gcc version on any linux version
+
 
 ## **9. Key Points / Documentation**
 
 1. **PyBind11**: binds C++ → Python, handles scalars and NumPy arrays.
-2. **CMake**: manages multi-platform C++ compilation.
-3. **PEP 517 (`pyproject.toml`)**: standard Python build system.
-4. **NumPy arrays**: use `unchecked` for fast elementwise ops.
-5. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
+2. **CMake**: manages multi-platform C++ compilation
+3. **pybind11_add_module** must at root cmake
+4. **cmake install** is mandatory: install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
+5. **PEP 517 (`pyproject.toml`)**: standard Python build system.
+6. **NumPy arrays**: use `unchecked` for fast elementwise ops.
+7. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
 
-## **10. summary
+## **10. reference**
 
 1. build system: docment: https://pybind11.readthedocs.io/en/stable/compiling.html
-   a. root cmake need pybind11_add_module
-   b. need install: install(TARGETS testpybind LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES})
-2. for best portable, need old linux with old gcc10
 
 ---
 
