@@ -40,6 +40,9 @@ table of content
     max portable
         low os version
         low gcc version
+    dependency lib
+        collect by script
+        force gcc min version
 
 ## build
 
@@ -388,8 +391,24 @@ script/build_wheels.bat
 * Shipping your own `libstdc++` removes dependency on the system, at the cost of slightly larger binaries.
 
 
-
 ## **9. Key Points / Documentation**
+
+this build system not collect the dependency.
+
+so you need write script to do it.
+
+some lib build on high version gcc version.
+
+so you need choose the minimum version that compatible with your 3rd party libs.
+
+
+for example:
+
+    1. binary lib without source build on c++ 20,  you have to upgrade your gcc version.
+    2. 3rd party source code with feature of c++ 20, you have to upgrade your gcc version.
+
+
+## **10. Key Points / Documentation**
 
 1. **PyBind11**: binds C++ → Python, handles scalars and NumPy arrays.
 2. **CMake**: manages multi-platform C++ compilation
@@ -399,7 +418,7 @@ script/build_wheels.bat
 6. **NumPy arrays**: use `unchecked` for fast elementwise ops.
 7. **Conda wheel**: build per Python version, avoids GCC/libstdc++ conflicts.
 
-## **10. reference**
+## **11. reference**
 
 1. build system: docment: https://pybind11.readthedocs.io/en/stable/compiling.html
 
