@@ -1,3 +1,15 @@
+# qick start
+
+```bash
+conda create -n py310 python=3.10
+conda activate py310
+
+pip install .
+python test/test_api.py
+
+```
+
+
 # testpybind
 
 
@@ -15,7 +27,11 @@
 1. prerequesite: conda and pybind11 lib
     ```bash
     conda create -n py310 python=3.10
+    conda activate py310
+    # lib
     conda install -c conda-forge pybind11 -y
+    # setup
+    python -m pip install --upgrade pip setuptools wheel scikit-build pybind11
     ```
 
 2. install and test
