@@ -21,6 +21,10 @@ pytest -v test/test_api.py
 
 # testpybind
 
+## branch
+
+    embed:  c++ call python
+    parallel:  multiple python in c++
 
 ## overview
 
