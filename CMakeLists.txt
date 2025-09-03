@@ -10,9 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 pybind11_add_module(testpybind)
 
-# Add src
-add_subdirectory(myadd)
-add_subdirectory(src)
 
 # this munally install will not be removed by pip uninstall
 # install(TARGETS testpybind
@@ -31,14 +28,20 @@ endif()
 
 # output dir
 if(MSVC)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # .lib (static library)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # 
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${INSTALL_BIN_DIR}")     # .lib (static library)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${INSTALL_BIN_DIR}")     # 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${INSTALL_BIN_DIR}")     # .exe, .dll runtime
 else()
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # .lib (static library)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${INSTALL_LIB_DIR}")     # .so import lib
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${INSTALL_BIN_DIR}")     # .exe, runtime
 endif()
+
+
+# Add src
+add_subdirectory(myadd)
+add_subdirectory(src)
+add_subdirectory(demo)
 
 # install dir
 if(MSVC)
