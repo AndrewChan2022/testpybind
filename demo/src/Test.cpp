@@ -46,22 +46,14 @@ PyObjectHolder::PyObjectHolder(const std::string& modulePath) {
         py::initialize_interpreter();
         mIsPythonOwner = true;
 
-        PyObject* sys_module = PyImport_ImportModule("sys");
-        PyObject* py_executable = PyObject_GetAttrString(sys_module, "executable");
-        const char* executable_path = PyUnicode_AsUTF8(py_executable);
-
+        // get python.exe path
+        py::module_ sys = py::module_::import("sys");
+        std::string executable_path = sys.attr("executable").cast<std::string>();
         std::cout << "Python initialized from: " << executable_path << std::endl;
 
-        // Get sys.prefix (Conda env path)
-        PyObject* py_prefix = PyObject_GetAttrString(sys_module, "prefix");
-        const char* prefix_path = PyUnicode_AsUTF8(py_prefix);
+        // sys.prefix (Conda env path)
+        std::string prefix_path = sys.attr("prefix").cast<std::string>();
         std::cout << "Python sys.prefix: " << prefix_path << std::endl;
-
-        Py_XDECREF(py_executable);
-        Py_XDECREF(sys_module);
-        Py_DECREF(sys_module);
-
-
     }
     else {
         printf("someone has already init python \n");

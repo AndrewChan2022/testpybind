@@ -18,6 +18,10 @@ python test/test_api.py
 pytest -v test/test_api.py
 ```
 
+# embed
+
+[Embed multiple python inside c++](./Embed.md)
+
 
 # testpybind
 

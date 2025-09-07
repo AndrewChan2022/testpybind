@@ -1,6 +1,8 @@
 
 ## implement
 
+### windows set python home
+
 ```cpp
 #ifdef _WIN32
 
@@ -22,6 +24,8 @@
 #endif
 
 ```
+
+### multiple python
 
 
 ## build for conda
